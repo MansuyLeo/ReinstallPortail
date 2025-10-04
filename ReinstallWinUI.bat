@@ -1,18 +1,21 @@
+:: Script par MANSUY Léo ::
+:: Si modification du script, se rappeler d'encoder en ISO 8859-15 ::
+
 @echo off
 chcp 1252 >nul
 setlocal
-title RÃ©installation propre de Microsoft.UI.Xaml 2.7.3
+title Réinstallation propre de Microsoft.UI.Xaml 2.7.3
 
 :: Variables
 set "PACKAGE_NAME=Microsoft.UI.Xaml.2.7"
 set "PACKAGE_FOLDER=%~dp0microsoft.ui.xaml.2.7.3\tools\AppX\x64\Release"
 set "PACKAGE_APPX=%PACKAGE_FOLDER%\Microsoft.UI.Xaml.2.7.appx"
-set "LOG_FILE=%~dp0ReinstallPortail.log"
+set "LOG_FILE=%~dp0ReinstallWinUI.log"
 
-:: Nettoyer le fichier log au dÃ©part
-> "%LOG_FILE%" echo [%date% %time%] [INFO] DÃ©but du script
+:: Nettoyer le fichier log au départ
+> "%LOG_FILE%" echo [%date% %time%] [INFO] Début du script
 
-:: VÃ©rifier les droits admin
+:: Vérifier les droits admin
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     powershell -Command "Write-Host '[ERREUR] Droits administrateur absents. Relancement en mode administrateur...' -ForegroundColor Red"
@@ -20,51 +23,51 @@ if %errorlevel% neq 0 (
     powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
 ) else (
-    echo [%date% %time%] [SUCCÃˆS] Droits administrateur validÃ©s >> "%LOG_FILE%"
+    echo [%date% %time%] [SUCCÈS] Droits administrateur validés >> "%LOG_FILE%"
 )
 
-:: VÃ©rifier la prÃ©sence du fichier .appx
+:: Vérifier la présence du fichier .appx
 if not exist "%PACKAGE_APPX%" (
     powershell -Command "Write-Host '[ERREUR] Fichier .appx introuvable : %PACKAGE_APPX%' -ForegroundColor Red"
     echo [%date% %time%] [ERREUR] Fichier .appx introuvable : %PACKAGE_APPX% >> "%LOG_FILE%"
     goto :wait_and_exit
 ) else (
-    echo [%date% %time%] [SUCCÃˆS] Fichier .appx trouvÃ© >> "%LOG_FILE%"
+    echo [%date% %time%] [SUCCÈS] Fichier .appx trouvé >> "%LOG_FILE%"
 )
 
-:: VÃ©rifier si Microsoft.UI.Xaml.2.7 est dÃ©jÃ  installÃ©
+:: Vérifier si Microsoft.UI.Xaml.2.7 est déjà installé
 powershell -Command "Get-AppxPackage -Name '%PACKAGE_NAME%'" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo [INFO] %PACKAGE_NAME% est dÃ©jÃ  installÃ©. Suppression...
-    echo [INFO] %PACKAGE_NAME% est dÃ©jÃ  installÃ©. Suppression... >> "%LOG_FILE%" 2>&1
+    echo [INFO] %PACKAGE_NAME% est déjà installé. Suppression...
+    echo [INFO] %PACKAGE_NAME% est déjà installé. Suppression... >> "%LOG_FILE%" 2>&1
     powershell -Command "Get-AppxPackage -Name '%PACKAGE_NAME%' | ForEach-Object { Remove-AppxPackage -Package $_.PackageFullName }" >> "%LOG_FILE%" 2>&1
     timeout /t 3 >nul
-    echo [%date% %time%] [SUCCÃˆS] Package %PACKAGE_NAME% supprimÃ© >> "%LOG_FILE%"
+    echo [%date% %time%] [SUCCÈS] Package %PACKAGE_NAME% supprimé >> "%LOG_FILE%"
 ) else (
-    echo [INFO] %PACKAGE_NAME% n'est pas dÃ©jÃ  installÃ©. >> "%LOG_FILE%" 2>&1
-    echo [%date% %time%] [INFO] Package %PACKAGE_NAME% non trouvÃ© (pas installÃ©) >> "%LOG_FILE%"
+    echo [INFO] %PACKAGE_NAME% n'est pas déjà installé. >> "%LOG_FILE%" 2>&1
+    echo [%date% %time%] [INFO] Package %PACKAGE_NAME% non trouvé (pas installé) >> "%LOG_FILE%"
 )
 
 :: Installer le package
 echo [INFO] Installation de %PACKAGE_NAME% depuis %PACKAGE_APPX%...
-echo [%date% %time%] [INFO] DÃ©but installation du package %PACKAGE_NAME% >> "%LOG_FILE%"
+echo [%date% %time%] [INFO] Début installation du package %PACKAGE_NAME% >> "%LOG_FILE%"
 powershell -Command "Add-AppxPackage -Path '%PACKAGE_APPX%'" >> "%LOG_FILE%" 2>&1
 if %errorlevel% neq 0 (
-    powershell -Command "Write-Host '[ERREUR] Ã‰chec de l''installation de %PACKAGE_NAME%. Voir log.' -ForegroundColor Red"
-    echo [%date% %time%] [ERREUR] Ã‰chec de l'installation de %PACKAGE_NAME%. >> "%LOG_FILE%"
+    powershell -Command "Write-Host '[ERREUR] Échec de l''installation de %PACKAGE_NAME%. Voir log.' -ForegroundColor Red"
+    echo [%date% %time%] [ERREUR] Échec de l'installation de %PACKAGE_NAME%. >> "%LOG_FILE%"
     goto :wait_and_exit
 ) else (
-    echo [%date% %time%] [SUCCÃˆS] Installation de %PACKAGE_NAME% terminÃ©e >> "%LOG_FILE%"
+    echo [%date% %time%] [SUCCÈS] Installation de %PACKAGE_NAME% terminée >> "%LOG_FILE%"
 )
 
-:: VÃ©rification post-installation
+:: Vérification post-installation
 powershell -Command "Get-AppxPackage -Name '%PACKAGE_NAME%'" >> "%LOG_FILE%" 2>&1
 if %errorlevel% equ 0 (
-    powershell -Command "Write-Host '[SUCCÃˆS] Installation du package terminÃ©e. Veuillez lancer le portail entreprise pour vÃ©rification.' -ForegroundColor Green"
-    echo [%date% %time%] [SUCCÃˆS] VÃ©rification finale : %PACKAGE_NAME% installÃ© avec succÃ¨s >> "%LOG_FILE%"
+    powershell -Command "Write-Host '[SUCCÈS] Installation du package terminée. Veuillez lancer le portail entreprise pour vérification.' -ForegroundColor Green"
+    echo [%date% %time%] [SUCCÈS] Vérification finale : %PACKAGE_NAME% installé avec succès >> "%LOG_FILE%"
 ) else (
-    powershell -Command "Write-Host '[ERREUR] %PACKAGE_NAME% ne s''est pas rÃ©installÃ© aprÃ¨s la tentative de rÃ©installation ! Voir log.' -ForegroundColor Red"
-    echo [%date% %time%] [ERREUR] %PACKAGE_NAME% absent aprÃ¨s rÃ©installation >> "%LOG_FILE%"
+    powershell -Command "Write-Host '[ERREUR] %PACKAGE_NAME% ne s''est pas réinstallé après la tentative de réinstallation ! Voir log.' -ForegroundColor Red"
+    echo [%date% %time%] [ERREUR] %PACKAGE_NAME% absent après réinstallation >> "%LOG_FILE%"
 )
 
 echo [%date% %time%] [INFO] Fin du script >> "%LOG_FILE%"
